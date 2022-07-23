@@ -1,12 +1,12 @@
 ## S3 ##
 output "s3_terraform_remote_backend_id" {
   description = "The name of the table"
-  value       = module.terraform_remote_backend.s3_bucket_id
+  value       = module.terraform_remote_backend.s3_id
 }
 
 output "s3_terraform_remote_backend_arn" {
   description = "The arn of the table"
-  value       = module.terraform_remote_backend.s3_bucket_arn
+  value       = module.terraform_remote_backend.s3_arn
 }
 
 ## DynamoDB ##
