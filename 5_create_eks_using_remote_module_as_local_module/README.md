@@ -1,19 +1,18 @@
-# Create EKS Cluster
+# Create VPC with 3-layered subnets
 
-![alt text](../imgs/eks.png "")
-
+![alt text](../imgs/3_layered_vpc.png "")
 
 Project architecture:
 ```sh
 .
 ├── README.md
 ├── composition
-│   ├── eks-demo-infra # <--- Step 3: Create Composition layer and define all the required inputs to Infrastructure module's EKS main.tf
+│   ├── eks-demo-infra # <--- Step 3: Create Composition layer and define all the required inputs to Infrastructure module's VPC main.tf
 │   │   └── ap-northeast-1
 │   │       └── prod
 │   │           ├── backend.config
 │   │           ├── data.tf
-│   │           ├── main.tf # <----- this is the entry point for EKS
+│   │           ├── main.tf # <----- this is the entry point for VPC
 │   │           ├── outputs.tf
 │   │           ├── providers.tf
 │   │           ├── terraform.tfenvs
@@ -30,19 +29,12 @@ Project architecture:
 │               ├── terraform.tfvars
 │               └── variables.tf
 ├── infrastructure_modules 
-│   ├── eks # <---- Step 2: Create Infrastructure Modules for VPC and Consume Resource Modules
-│   │   ├── data.tf
-│   │   ├── main.tf
-│   │   ├── outputs.tf
-│   │   ├── template
-│   │   │   └── ssm_document_cleanup_docker_images.yaml
-│   │   └── variables.tf
 │   ├── terraform_remote_backend
 │   │   ├── data.tf
 │   │   ├── main.tf
 │   │   ├── outputs.tf
 │   │   └── variables.tf
-│   └── vpc
+│   └── vpc # <---- Step 2: Create Infrastructure Modules for VPC and Consume Resource Modules
 │       ├── data.tf
 │       ├── main.tf
 │       ├── outputs.tf
@@ -51,51 +43,11 @@ Project architecture:
 │       └── versions.tf
 └── resource_modules 
     ├── compute
-    │   ├── ec2_key_pair
-    │   │   ├── main.tf
-    │   │   ├── output.tf
-    │   │   └── variables.tf
-    │   └── security_group
+    │   └── security_group  # <----- Step 1: Replicate remote TF modules in local Resource Modules
     │       ├── main.tf
     │       ├── outputs.tf
     │       ├── rules.tf
-    │       ├── update_groups.sh
     │       └── variables.tf
-    ├── container
-    │   ├── ecr
-    │   │   ├── main.tf
-    │   │   ├── outputs.tf
-    │   │   └── variables.tf
-    │   └── eks # <----- Step 1: Replicate remote TF modules in local Resource Modules
-    │       ├── aws_auth.tf
-    │       ├── cluster.tf
-    │       ├── data.tf
-    │       ├── irsa.tf
-    │       ├── kubectl.tf
-    │       ├── local.tf
-    │       ├── modules
-    │       │   ├── fargate
-    │       │   │   ├── data.tf
-    │       │   │   ├── fargate.tf
-    │       │   │   ├── outputs.tf
-    │       │   │   └── variables.tf
-    │       │   └── node_groups
-    │       │       ├── README.md
-    │       │       ├── locals.tf
-    │       │       ├── node_groups.tf
-    │       │       ├── outputs.tf
-    │       │       ├── ramdom.tf
-    │       │       └── variables.tf
-    │       ├── node_groups.tf
-    │       ├── outputs.tf
-    │       ├── scripts
-    │       ├── templates
-    │       │   ├── kubeconfig.tpl
-    │       │   └── userdata.sh.tpl
-    │       ├── variables.tf
-    │       ├── versions.tf
-    │       ├── workers.tf
-    │       └── workers_launch_template.tf
     ├── database
     │   └── dynamodb
     │       ├── main.tf
@@ -107,7 +59,7 @@ Project architecture:
     │       ├── outputs.tf
     │       └── variables.tf 
     ├── network
-    │   └── vpc 
+    │   └── vpc # <----- Step 1: Replicate remote TF modules in local Resource Modules
     │       ├── main.tf
     │       ├── outputs.tf
     │       └── variables.tf
@@ -118,236 +70,213 @@ Project architecture:
             └── variables.tf
 ```
 
-# Step 1: Replicate Remote TF modules for EKS in local Resource Modules
+# Step 1: Replicate Remote TF modules for VPC and SG in local Resource Modules
 
-## EKS
-Copy paste all the .tf and `/templates` and `/scripts` at the root of this repo https://github.com/terraform-aws-modules/terraform-aws-eks to `resource_modules/network/vpc`.
+## VPC
+Copy paste all the .tf at the root of this repo https://github.com/terraform-aws-modules/terraform-aws-vpc to `resource_modules/network/vpc`.
 
-
-In [resource_modules/container/eks/workers.tf](resource_modules/container/eks/workers.tf), use `substr()`
-```
-resource "aws_iam_role" "workers" {
-  name_prefix           = substr(var.workers_role_name != "" ? null : coalescelist(aws_eks_cluster.this[*].name, [""])[0], 0, 31)
-```
+## Security group
+Copy paste all the .tf at the root of this repo https://github.com/terraform-aws-modules/terraform-aws-security-group to `resource_modules/compute/security-group`.
 
 
-In [resource_modules/container/eks/variables.tf](resource_modules/container/eks/variables.tf),
-```sh
-# externalize this var so value can be injected at higher level (infra modules)
-variable "key_name" {
-  default = ""
-}
-```
+# Step 2: Create Infrastructure Modules for VPC and Consume Resource Modules
 
-In [resource_modules/container/eks/local.tf](resource_modules/container/eks/local.tf),
-```sh
-workers_group_defaults_defaults = {
-    root_volume_type              = "gp2"
-    key_name                      = var.key_name       # The key pair name that should be used for the instances in the autoscaling group
-```
+Using [AWS Terraform Remote Module's examples](https://github.com/terraform-aws-modules/terraform-aws-vpc/blob/master/examples/complete-vpc/main.tf), create VPC infra module's main.tf.
 
-
-
-
-
-# Step 2: Create Infrastructure Modules for EKS and Consume Resource Modules
-
-Using [AWS EKS Terraform Remote Module's examples](https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/examples/basic/main.tf), create EKS infra module's main.tf.
-
-In [infrastructure_modules/eks/main.tf](infrastructure_modules/eks/main.tf), module `eks` will act as a __facade__ to many sub-components such as EKS cluster, EKS worker nodes, IAM roles, worker launch template, security groups, auto scaling groups, etc.
+In [infrastructure_modules/vpc/main.tf](infrastructure_modules/vpc/main.tf), module `vpc` will act as a __facade__ to many sub-components such as VPC, IGW, NAT GW, subnets, route table, routes, etc.
 
 ```sh
-module "key_pair" {
-  source = "../../resource_modules/compute/ec2_key_pair"
+module "vpc" {
+  source = "../../resource_modules/network/vpc"
 
-  key_name   = local.key_pair_name
-  public_key = local.public_key
+  name = var.name
+  cidr = var.cidr
+
+  azs              = var.azs
+  private_subnets  = var.private_subnets
+  public_subnets   = var.public_subnets
+  database_subnets = var.database_subnets
+
+  enable_dns_hostnames = var.enable_dns_hostnames
+  enable_dns_support   = var.enable_dns_support
+
+  enable_nat_gateway = var.enable_nat_gateway
+  single_nat_gateway = var.single_nat_gateway
+
+  tags                 = var.tags
+  public_subnet_tags   = local.public_subnet_tags
+  private_subnet_tags  = local.private_subnet_tags
+  database_subnet_tags = local.database_subnet_tags
 }
 
-# ref: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/examples/basic/main.tf#L125-L160
-module "eks_cluster" {
-  source = "../../resource_modules/container/eks"
+# allow ingress for port 80 & 443 from anywhere (i.e. source CIDR 0.0.0.0/0)
+module "public_security_group" {
+  source = "../../resource_modules/compute/security_group"
 
-  create_eks      = var.create_eks
-  cluster_version = var.cluster_version
-  cluster_name    = var.cluster_name
-  kubeconfig_name = var.cluster_name
-  vpc_id          = var.vpc_id
-  subnets         = var.subnets
+  name        = local.public_security_group_name
+  description = local.public_security_group_description
+  vpc_id      = module.vpc.vpc_id
 
-  worker_groups                        = var.worker_groups
-  node_groups                          = var.node_groups
-  worker_additional_security_group_ids = var.worker_additional_security_group_ids
+  ingress_rules            = ["http-80-tcp", "https-443-tcp"] # ref: https://github.com/terraform-aws-modules/terraform-aws-security-group/blob/master/examples/complete/main.tf#L44
+  ingress_cidr_blocks      = ["0.0.0.0/0"]
+  ingress_with_cidr_blocks = var.public_ingress_with_cidr_blocks
 
-  map_roles                                  = var.map_roles
-  map_users                                  = var.map_users
-  kubeconfig_aws_authenticator_env_variables = var.kubeconfig_aws_authenticator_env_variables
+  # allow all egress
+  egress_rules = ["all-all"]
+  tags         = local.public_security_group_tags
+}
 
-  key_name = module.key_pair.key_name
+# allow ingress only from public SG for port 80, 443, and 22
+module "private_security_group" {
+  source = "../../resource_modules/compute/security_group"
 
-  # WARNING: changing this will force recreating an entire EKS cluster!!!
-  # enable k8s secret encryption using AWS KMS. Ref: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/examples/secrets_encryption/main.tf#L88
-  cluster_encryption_config = [
+  name        = local.private_security_group_name
+  description = local.private_security_group_description
+  vpc_id      = module.vpc.vpc_id
+
+  # define ingress source as computed security group IDs, not CIDR block
+  # ref: https://github.com/terraform-aws-modules/terraform-aws-security-group/blob/master/examples/complete/main.tf#L150
+  computed_ingress_with_source_security_group_id = [
     {
-      provider_key_arn = module.k8s_secret_kms_key.arn
-      resources        = ["secrets"]
-    }
+      rule                     = "http-80-tcp"
+      source_security_group_id = module.public_security_group.this_security_group_id
+      description              = "Port 80 from public SG rule"
+    },
+    {
+      rule                     = "https-443-tcp"
+      source_security_group_id = module.public_security_group.this_security_group_id
+      description              = "Port 443 from public SG rule"
+    },
+    # bastion EC2 not created yet 
+    # {
+    #   rule                     = "ssh-tcp"
+    #   source_security_group_id = var.bastion_sg_id
+    #   description              = "SSH from bastion SG rule"
+    # },
+  ]
+  number_of_computed_ingress_with_source_security_group_id = 2
+
+  # allow ingress from within (i.e. connecting from EC2 to other EC2 associated with the same private SG)
+  ingress_with_self = [
+    {
+      rule        = "all-all"
+      description = "Self"
+    },
   ]
 
-  tags = var.tags
+  # allow all egress
+  egress_rules                                             = ["all-all"]
+  tags                                                     = local.private_security_group_tags
 }
 
-# ########################################
-# ## KMS for K8s secret's DEK (data encryption key) encryption
-# ########################################
-module "k8s_secret_kms_key" {
-  source = "../../resource_modules/identity/kms_key"
+# allow ingress from private SG for port 27017-19 for mongoDB and port 3306 for MySQL
+module "database_security_group" {
+  source = "../../resource_modules/compute/security_group"
 
-  name                    = local.k8s_secret_kms_key_name
-  description             = local.k8s_secret_kms_key_description
-  deletion_window_in_days = local.k8s_secret_kms_key_deletion_window_in_days
-  tags                    = local.k8s_secret_kms_key_tags
-  policy                  = data.aws_iam_policy_document.k8s_api_server_decryption.json
-  enable_key_rotation     = true
+  name        = local.db_security_group_name
+  description = local.db_security_group_description
+  vpc_id      = module.vpc.vpc_id
+
+  # combine list of SG rules from EKS worker SG and private SG
+  computed_ingress_with_source_security_group_id           = concat(local.db_security_group_computed_ingress_with_source_security_group_id, var.databse_computed_ingress_with_eks_worker_source_security_group_ids)
+  number_of_computed_ingress_with_source_security_group_id = var.create_eks ? 7 : 4
+
+  # Open for self (rule or from_port+to_port+protocol+description)
+  ingress_with_self = [
+    {
+      rule        = "all-all"
+      description = "Self"
+    },
+  ]
+
+  # allow all egress
+  egress_rules = ["all-all"]
+  tags         = local.db_security_group_tags
 }
 ```
 
-
-Create public and private key locally using `ssh-keygen`, then copy public key content in [infrastructure_modules/eks/data.tf](infrastructure_modules/eks/data.tf):
-
-```sh
-locals {
-  ## Key Pair ##
-  key_pair_name = "eks-workers-keypair-${var.region_tag[var.region]}-${var.env}-${var.app_name}"
-  # run "ssh-keygen" then copy public key content to public_key
-  public_key    = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+6hyhXItMXzNI/P481x2BsIU2VEVE4N2ET43GMxr1y+Hufa58BIzd0I7JuForq8kufhx2PhWnlD6wj6YKYti5qu4nvaKbVABYtzO0QN6SLo48kvmdwX4UF+QLO/YoBau/czq1zgxZ18F3kQ/Z0rdy11O7tU7dRDUGvpCNL8G+Qkadwt39AIXd3923GMtB8TxjWN4HeKLD9VGDOyD9WgmIwuC8/hJhej9AaqA/zKDcgune8ZPv8AQ7STzKNynnKaGjzpZPeY9xvPBsNEZjCJsKt3XBQGd+Hz3DtmGrsCMAbF5FUdZll5fzgZK46zwXnRRp2XjUEfUJyoLhaaay1Yvd usermane@User-MBP.w.mifi"
-
-```
 
 
 # Step 3: Create Composition layer and define all the required inputs to Infrastructure VPC module's main.tf
 
 In [composition/eks-demo-infra/ap-northeast-1/prod/main.tf](composition/eks-demo-infra/ap-northeast-1/prod/main.tf), a single module called `vpc` is defined.
 
+This is kind of thought as main class's main(), which just calls `infrastructure_modules/vpc` which creates VPC related resources (VPC, IGW, NAT GW, RT, Subnets, SG, etc) internally.
 
 ```sh
 ########################################
-# EKS
+# VPC
 ########################################
-module "eks" {
-  source = "../../../../infrastructure_modules/eks"
+module "vpc" {
+  source = "../../../../infrastructure_modules/vpc" # using infra module VPC which acts like a facade to many sub-resources
 
-  ## EKS ##
-  create_eks      = var.create_eks
-  cluster_version = var.cluster_version
-  cluster_name    = local.cluster_name
-  vpc_id          = local.vpc_id
-  subnets         = local.private_subnets
+  name                 = var.app_name
+  cidr                 = var.cidr
+  azs                  = var.azs
+  private_subnets      = var.private_subnets
+  public_subnets       = var.public_subnets
+  database_subnets     = var.database_subnets
+  enable_dns_hostnames = var.enable_dns_hostnames
+  enable_dns_support   = var.enable_dns_support
+  enable_nat_gateway   = var.enable_nat_gateway
+  single_nat_gateway   = var.single_nat_gateway
 
-  # note: either pass worker_groups or node_groups
-  # this is for (EKSCTL API) unmanaged node group
-  worker_groups = var.worker_groups
+  ## Public Security Group ##
+  public_ingress_with_cidr_blocks = var.public_ingress_with_cidr_blocks
 
-  # this is for (EKS API) managed node group
-  node_groups = var.node_groups
+  ## Private Security Group ##
+  # bastion EC2 not created yet
+  # bastion_sg_id  = module.bastion.security_group_id
 
-  # worker_additional_security_group_ids = [data.aws_security_group.client_vpn_sg.id]
+  ## Database security group ##
+  # DB Controller EC2 not created yet
+  # databse_computed_ingress_with_db_controller_source_security_group_id = module.db_controller_instance.security_group_id
+  create_eks                                                           = var.create_eks
+  # pass EKS worker SG to DB SG after creating EKS module at composition layer
+  databse_computed_ingress_with_eks_worker_source_security_group_ids   = local.databse_computed_ingress_with_eks_worker_source_security_group_ids
 
-  # add roles that can access K8s cluster
-  #map_roles = local.map_roles
-  # add IAM users who can access K8s cluster
-  #map_users = var.map_users
-
-  # specify AWS Profile if you want kubectl to use a named profile to authenticate instead of access key and secret access key
-  kubeconfig_aws_authenticator_env_variables = local.kubeconfig_aws_authenticator_env_variables
+  # cluster_name = local.cluster_name
 
   ## Common tag metadata ##
-  env             = var.env
-  app_name        = var.app_name
-  tags            = local.eks_tags
-  region          = var.region
+  env      = var.env
+  app_name = var.app_name
+  tags     = local.vpc_tags
+  region   = var.region
 }
 ```
-
-Also, you need to define `kubernetes` provider
-```sh
-terraform {
-  required_version = ">= 0.14"
-  backend "s3" {} # use backend.config for remote backend
-
-  required_providers {
-    aws    = ">= 3.28, < 4.0"
-    random = "~> 2"
-    kubernetes = "~>1.11"
-    local = "~> 1.2"
-    null = "~> 2.1"
-    template = "~> 2.1"
-  }
-}
-
-# In case of not creating the cluster, this will be an incompletely configured, unused provider, which poses no problem.
-# ref: https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs
-provider "kubernetes" {
-  # if you use default value of "manage_aws_auth = true" then you need to configure the kubernetes provider as per the doc: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/v12.1.0/README.md#conditional-creation, https://github.com/terraform-aws-modules/terraform-aws-eks/issues/911
-  host                   = element(concat(data.aws_eks_cluster.cluster[*].endpoint, list("")), 0)
-  cluster_ca_certificate = base64decode(element(concat(data.aws_eks_cluster.cluster[*].certificate_authority.0.data, list("")), 0))
-  token                  = element(concat(data.aws_eks_cluster_auth.cluster[*].token, list("")), 0)
-  load_config_file       = false # set to false unless you want to import local kubeconfig to terraform
-}
-```
-
-And data
-```sh
-# if you leave default value of "manage_aws_auth = true" then you need to configure the kubernetes provider as per the doc: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/v12.1.0/README.md#conditional-creation, https://github.com/terraform-aws-modules/terraform-aws-eks/issues/911
-data "aws_eks_cluster" "cluster" {
-  count = var.create_eks ? 1 : 0
-  name  = module.eks.cluster_id
-}
-
-data "aws_eks_cluster_auth" "cluster" {
-  count = var.create_eks ? 1 : 0
-  name  = module.eks.cluster_id
-}
-```
-
 
 
 Finally supply input variable values in [composition/eks-demo-infra/ap-northeast-1/prod/terraform.tfvars](composition/eks-demo-infra/ap-northeast-1/prod/terraform.tfvars):
 
 ```sh
 ########################################
-# EKS
+# Environment setting
 ########################################
-cluster_version = 1.19
+region = "ap-northeast-1"
+role_name    = "Admin"
+profile_name = "aws-demo"
+env = "prod"
+application_name = "terraform-eks-demo-infra"
+app_name = "terraform-eks-demo-infra"
 
-# if set to true, AWS IAM Authenticator will use IAM role specified in "role_name" to authenticate to a cluster
-authenticate_using_role = true
+########################################
+# VPC
+########################################
+cidr                  = "10.1.0.0/16" 
+azs                   = ["ap-northeast-1a", "ap-northeast-1c", "ap-northeast-1d"]
+public_subnets        = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"] # 256 IPs per subnet
+private_subnets       = ["10.1.101.0/24", "10.1.102.0/24", "10.1.103.0/24"]
+database_subnets      = ["10.1.105.0/24", "10.1.106.0/24", "10.1.107.0/24"]
+enable_dns_hostnames  = "true"
+enable_dns_support    = "true"
+enable_nat_gateway    = "true" # need internet connection for worker nodes in private subnets to be able to join the cluster 
+single_nat_gateway    = "true"
 
-# if set to true, AWS IAM Authenticator will use AWS Profile name specified in profile_name to authenticate to a cluster instead of access key and secret access key
-authenticate_using_aws_profile = false
 
-# WARNING: mixing managed and unmanaged node groups will render unmanaged nodes to be unable to connect to internet & join the cluster when restarting.
-# how many groups of K8s worker nodes you want? Specify at least one group of worker node
-# gotcha: managed node group doesn't support 1) propagating taint to K8s nodes and 2) custom userdata. Ref: https://eksctl.io/usage/eks-managed-nodes/#feature-parity-with-unmanaged-nodegroups
-node_groups = {}
+## Public Security Group ##
+public_ingress_with_cidr_blocks = []
 
-# note (only for unmanaged node group)
-worker_groups = [
-  {
-    name                 = "worker-group-prod-1"
-    instance_type        = "m3.medium" # since we are using AWS-VPC-CNI, allocatable pod IPs are defined by instance size: https://docs.google.com/spreadsheets/d/1MCdsmN7fWbebscGizcK6dAaPGS-8T_dYxWp0IdwkMKI/edit#gid=1549051942, https://github.com/awslabs/amazon-eks-ami/blob/master/files/eni-max-pods.txt
-    asg_max_size         = 2
-    asg_min_size         = 1
-    asg_desired_capacity = 1 # this will be ignored if cluster autoscaler is enabled: asg_desired_capacity: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/docs/autoscaling.md#notes
-    tags = [
-      {
-        "key"                 = "unmanaged-node"
-        "propagate_at_launch" = "true"
-        "value"               = "true"
-      },
-    ]
-  },
-]
+create_eks = false
 ```
 
 Then run terraform commands
@@ -361,84 +290,87 @@ terraform init -backend-config=backend.config
 terraform plan
 terraform apply
 
-# wait for about 15 minutes!!
-module.eks.module.eks_cluster.null_resource.wait_for_cluster[0]: Still creating... [14m51s elapsed]
-module.eks.module.eks_cluster.null_resource.wait_for_cluster[0]: Still creating... [15m1s elapsed]
-module.eks.module.eks_cluster.null_resource.wait_for_cluster[0]: Creation complete after 15m6s [id=2913039165535485096]
-data.aws_eks_cluster_auth.cluster[0]: Reading...
-data.aws_eks_cluster.cluster[0]: Reading...
-data.aws_eks_cluster_auth.cluster[0]: Read complete after 0s [id=eks-apne1-prod-terraform-eks-demo-infra]
-data.aws_eks_cluster.cluster[0]: Read complete after 1s [id=eks-apne1-prod-terraform-eks-demo-infra]
-module.eks.module.eks_cluster.kubernetes_config_map.aws_auth[0]: Creating...
-module.eks.module.eks_cluster.kubernetes_config_map.aws_auth[0]: Creation complete after 2s [id=kube-system/aws-auth]
-
 # Successful output
-Apply complete! Resources: 36 added, 0 changed, 0 destroyed.
-```
+Apply complete! Resources: 43 added, 0 changed, 0 destroyed.
+Releasing state lock. This may take a few moments...
 
+Outputs:
 
-## Step 4: Configure local kubeconfig to access EKS cluster
-Ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/
-
-
-By default, kubectl will look for kubeconfig stored in `~/.kube/config`, if not then the path found in env variable `KUBECONFIG`.
-
-
-### Scenario 1: the default kubeconfig is empty
-If you don't have any other k8s cluster config stored in `~/.kube/config`, then you can overwrite it with the EKS cluster config.
-
-First output kubeconfig contents using `terraform output`:
-```sh
-# show contents of kubeconfig for this EKS cluster
-terraform output eks_kubeconfig
-
-# show file name of kubeconfig stored locally
-terraform output eks_kubeconfig_filename
-
-# optionally, you can write contents to the default kubeconfig path
-terraform output eks_kubeconfig > `~/.kube/config`
-
-# check authentication
-kubectl cluster-info
-
-# output
-Kubernetes master is running at https://EFFDE7B864F8D3778BD3417E5572FAE0.gr7.ap-northeast-1.eks.amazonaws.com
-CoreDNS is running at https://EFFDE7B864F8D3778BD3417E5572FAE0.gr7.ap-northeast-1.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
-
-To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
-```
-
-### Scenario 2: the default kubeconfig is NOT empty and you will manually edit it
-If you already have another k8s cluster config in `~/.kube/config` and you don't want to overwrite the file, you can manually edit the file by adding the EKS cluster info.
-
-### Scenario 3: the default kubeconfig is NOT empty and you want to keep a separate kubeconfig file
-Or you can pass `-kubeconfig` argument to `kubectl` command to refer to other kubeconfig file without editing `~/.kube/config` at all
-```sh
-# write contents to the default kubeconfig path
-terraform output eks_kubeconfig > `~/.kube/eks-apne1-prod-terraform-eks-demo-infra`
-
-# check authentication by specifying a non-default kubeconfig file path
-kubectl cluster-info \
-  --kubeconfig=./kubeconfig_eks-apne1-prod-terraform-eks-demo-infra
-
-# output
-Kubernetes master is running at https://EFFDE7B864F8D3778BD3417E5572FAE0.gr7.ap-northeast-1.eks.amazonaws.com
-CoreDNS is running at https://EFFDE7B864F8D3778BD3417E5572FAE0.gr7.ap-northeast-1.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
-
-To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
-
-# you need to specify --kubeconfig for each kubectl command
-kubectl get po --kubeconfig=./kubeconfig_eks-apne1-prod-terraform-eks-demo-infra
-
-# if you don't want to pass --kubeconfig everytime, you can set ENV KUBECONFIG in current shell
-export KUBECONFIG="${PWD}/kubeconfig_eks-apne1-prod-terraform-eks-demo-infra"
-kubectl get po
-```
-
-
-Destroy only `eks` module
-```
-terraform state list
-
-terraform destroy -target=module.eks
+database_network_acl_id = ""
+database_route_table_ids = tolist([
+  "rtb-05cd8f1ee199e829d",
+])
+database_security_group_id = "sg-0cfa939b62d328fdd"
+database_security_group_name = "scg-apne1-prod-database-20210216172630941200000002"
+database_security_group_owner_id = "xxxxxxx"
+database_security_group_vpc_id = "vpc-07e4383b75c37b1e0"
+database_subnet_arns = [
+  "arn:aws:ec2:ap-northeast-1:xxxxxxx:subnet/subnet-0235daeeafb2eb86e",
+  "arn:aws:ec2:ap-northeast-1:xxxxxxx:subnet/subnet-0d4fe98223c85a7d5",
+  "arn:aws:ec2:ap-northeast-1:xxxxxxx:subnet/subnet-0d1a9f4f51a7bcf14",
+]
+database_subnet_group = "terraform-eks-demo-infra"
+database_subnets = [
+  "subnet-0235daeeafb2eb86e",
+  "subnet-0d4fe98223c85a7d5",
+  "subnet-0d1a9f4f51a7bcf14",
+]
+database_subnets_cidr_blocks = [
+  "10.1.105.0/24",
+  "10.1.106.0/24",
+  "10.1.107.0/24",
+]
+igw_id = "igw-0c731c8c529ac6291"
+nat_ids = [
+  "eipalloc-0a19db1dfc7f28e10",
+]
+nat_public_ips = tolist([
+  "13.115.36.4",
+])
+natgw_ids = [
+  "nat-04c7aac5dd187894e",
+]
+private_network_acl_id = ""
+private_route_table_ids = [
+  "rtb-05cd8f1ee199e829d",
+]
+private_security_group_id = "sg-081c4c5ed67883b98"
+private_security_group_name = "scg-apne1-prod-private-20210216172630729700000001"
+private_security_group_owner_id = "xxxxxxx"
+private_security_group_vpc_id = "vpc-07e4383b75c37b1e0"
+private_subnets = [
+  "subnet-059466b92e5120afa",
+  "subnet-088cbeb573a80e947",
+  "subnet-016792c80e93d31bf",
+]
+private_subnets_cidr_blocks = [
+  "10.1.101.0/24",
+  "10.1.102.0/24",
+  "10.1.103.0/24",
+]
+public_network_acl_id = ""
+public_route_table_ids = [
+  "rtb-0867c95134399ef38",
+]
+public_security_group_id = "sg-0771d52c3ba5d9642"
+public_security_group_name = "scg-apne1-prod-public-20210216172630960800000003"
+public_security_group_owner_id = "xxxxxxx"
+public_security_group_vpc_id = "vpc-07e4383b75c37b1e0"
+public_subnets = [
+  "subnet-0f5d3c1c7f306792b",
+  "subnet-090c4f0f00583036b",
+  "subnet-0a82b1828528f6aa7",
+]
+public_subnets_cidr_blocks = [
+  "10.1.1.0/24",
+  "10.1.2.0/24",
+  "10.1.3.0/24",
+]
+vpc_cidr_block = "10.1.0.0/16"
+vpc_enable_dns_hostnames = true
+vpc_enable_dns_support = true
+vpc_id = "vpc-07e4383b75c37b1e0"
+vpc_instance_tenancy = "default"
+vpc_main_route_table_id = "rtb-03701d293fea25d41"
+vpc_secondary_cidr_blocks = []
 ```

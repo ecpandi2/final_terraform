@@ -100,7 +100,7 @@ resource "aws_autoscaling_group" "workers_launch_template" {
 
   dynamic "mixed_instances_policy" {
     iterator = item
-    for_each = (lookup(var.worker_groups_launch_template[count.index], "override_instance_types", null) != null) || (lookup(var.worker_groups_launch_template[count.index], "on_demand_allocation_strategy", local.workers_group_defaults["on_demand_allocation_strategy"]) != null) ? tolist([var.worker_groups_launch_template[count.index]]) : []
+    for_each = (lookup(var.worker_groups_launch_template[count.index], "override_instance_types", null) != null) || (lookup(var.worker_groups_launch_template[count.index], "on_demand_allocation_strategy", local.workers_group_defaults["on_demand_allocation_strategy"]) != null) ? tolist([var.worker_groups_launch_template[count.index]]): []
 
     content {
       instances_distribution {
@@ -363,14 +363,15 @@ resource "aws_launch_template" "workers_launch_template" {
     }
   }
 
-/*
-  dynamic "instance_market_options" {
+/*  
+dynamic "instance_market_options" {
     for_each = lookup(var.worker_groups_launch_template[count.index], "market_type", null) == null ? [] : tolist([lookup(var.worker_groups_launch_template[count.index], "market_type", null]))
     content {
       market_type = instance_market_options.value
     }
   }
-*/
+  */
+
   block_device_mappings {
     device_name = lookup(
       var.worker_groups_launch_template[count.index],

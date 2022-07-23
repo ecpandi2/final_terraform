@@ -4,15 +4,15 @@
 ########################################
 
 terraform {
-  required_version = "> 1.0"
+  required_version = "> 1.1"
   backend "s3" {} # use backend.config for remote backend
 
   required_providers {
-    aws        = "~> 4.0"
+    aws        = "> 4.0"
     random     = "~> 3.3"
     kubernetes = "~> 2.0"
-    local      = "~> 2.0"
-    null       = "~> 3.0"
+    local      = "~> 2.2"
+    null       = "~> 3.1"
     template   = "~> 2.1"
   }
 }

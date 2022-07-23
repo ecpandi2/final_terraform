@@ -12,7 +12,7 @@ app_name         = "terraform-eks-demo-infra"
 # VPC
 ########################################
 cidr                 = "10.1.0.0/16"
-azs                  = ["us-east-11a", "us-east-1c", "us-east-1d"]
+azs                  = ["us-east-1a", "us-east-1c", "us-east-1d"]
 public_subnets       = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"] # 256 IPs per subnet
 private_subnets      = ["10.1.101.0/24", "10.1.102.0/24", "10.1.103.0/24"]
 database_subnets     = ["10.1.105.0/24", "10.1.106.0/24", "10.1.107.0/24"]

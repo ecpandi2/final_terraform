@@ -42,7 +42,7 @@ locals {
     }),
     tomap({
         "Tier" = "private"
-    })
+    }),
   )
 
   ## DB SG ##
@@ -55,7 +55,7 @@ locals {
     }),
     tomap({
         "Tier" = "database"
-    })
+    }),
   )
 
   db_security_group_computed_ingress_with_source_security_group_id = [
