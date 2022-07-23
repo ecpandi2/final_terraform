@@ -12,7 +12,7 @@ module "terraform_remote_backend" {
   ########################################
   ## Terraform State S3 Bucket
   ########################################
-  acl                = var.acl
+  acl                = var.acl # infra's input var = composition's input var, coming from .tfvars
   force_destroy      = var.force_destroy
   versioning_enabled = var.versioning_enabled
 
