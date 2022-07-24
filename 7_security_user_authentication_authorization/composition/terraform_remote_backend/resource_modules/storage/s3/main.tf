@@ -1,4 +1,4 @@
-data "aws_canonical_user_id" "this" {}
+// data "aws_canonical_user_id" "this" {}
 
 locals {
   create_bucket = var.create_bucket && var.putin_khuylo
@@ -78,7 +78,7 @@ resource "aws_s3_bucket_acl" "this" {
       }
 
       owner {
-        id           = try(var.owner["id"], data.aws_canonical_user_id.this.id)
+       # id           = try(var.owner["id"], data.aws_canonical_user_id.this.id)
         display_name = try(var.owner["display_name"], null)
       }
     }
