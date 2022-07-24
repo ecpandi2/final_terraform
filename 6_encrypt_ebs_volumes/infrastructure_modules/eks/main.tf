@@ -58,7 +58,7 @@ module "k8s_secret_kms_key" {
 ## KMS for EKS node's EBS volume
 ########################################
 module "eks_node_ebs_kms_key" {
-  source = "../../resource_module/identity/kms_key"
+  source = "../../resource_modules/identity/kms_key"
 
   name                    = local.eks_node_ebs_kms_key_name
   description             = local.eks_node_ebs_kms_key_description
