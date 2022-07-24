@@ -24,7 +24,9 @@ locals {
   eks_node_ebs_kms_key_deletion_window_in_days = "30"
   eks_node_ebs_kms_key_tags = merge(
     var.tags,
-    map("Name", local.eks_node_ebs_kms_key_name)
+    tomap({
+      "Name" = local.eks_node_ebs_kms_key_name
+    })
   )
 }
 

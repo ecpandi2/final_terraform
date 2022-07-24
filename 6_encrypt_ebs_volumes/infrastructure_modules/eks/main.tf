@@ -53,3 +53,17 @@ module "k8s_secret_kms_key" {
   policy                  = data.aws_iam_policy_document.k8s_api_server_decryption.json
   enable_key_rotation     = true
 }
+
+########################################
+## KMS for EKS node's EBS volume
+########################################
+module "eks_node_ebs_kms_key" {
+  source = "../../resource_module/identity/kms_key"
+
+  name                    = local.eks_node_ebs_kms_key_name
+  description             = local.eks_node_ebs_kms_key_description
+  deletion_window_in_days = local.eks_node_ebs_kms_key_deletion_window_in_days
+  tags                    = local.eks_node_ebs_kms_key_tags
+  policy                  = data.aws_iam_policy_document.ebs_decryption.json
+  enable_key_rotation     = true
+}
