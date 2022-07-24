@@ -10,24 +10,6 @@ variable "attach_elb_log_delivery_policy" {
   default     = false
 }
 
-variable "attach_lb_log_delivery_policy" {
-  description = "Controls if S3 bucket should have ALB/NLB log delivery policy attached"
-  type        = bool
-  default     = false
-}
-
-variable "attach_deny_insecure_transport_policy" {
-  description = "Controls if S3 bucket should have deny non-SSL transport policy attached"
-  type        = bool
-  default     = false
-}
-
-variable "attach_require_latest_tls_policy" {
-  description = "Controls if S3 bucket should require the latest version of TLS"
-  type        = bool
-  default     = false
-}
-
 variable "attach_policy" {
   description = "Controls if S3 bucket should have bucket policy attached (set to `true` to use value of `policy` as bucket policy)"
   type        = bool
@@ -53,9 +35,9 @@ variable "bucket_prefix" {
 }
 
 variable "acl" {
-  description = "(Optional) The canned ACL to apply. Conflicts with `grant`"
+  description = "(Optional) The canned ACL to apply. Defaults to 'private'. Conflicts with `grant`"
   type        = string
-  default     = null
+  default     = "private"
 }
 
 variable "policy" {
@@ -90,7 +72,7 @@ variable "request_payer" {
 
 variable "website" {
   description = "Map containing static web-site hosting or redirect configuration."
-  type        = any # map(string)
+  type        = map(string)
   default     = {}
 }
 
@@ -118,18 +100,6 @@ variable "grant" {
   default     = []
 }
 
-variable "owner" {
-  description = "Bucket owner's display name and ID. Conflicts with `acl`"
-  type        = map(string)
-  default     = {}
-}
-
-variable "expected_bucket_owner" {
-  description = "The account ID of the expected bucket owner"
-  type        = string
-  default     = null
-}
-
 variable "lifecycle_rule" {
   description = "List of maps containing configuration of object lifecycle management."
   type        = any
@@ -148,22 +118,10 @@ variable "server_side_encryption_configuration" {
   default     = {}
 }
 
-variable "intelligent_tiering" {
-  description = "Map containing intelligent tiering configuration."
-  type        = any
-  default     = {}
-}
-
 variable "object_lock_configuration" {
   description = "Map containing S3 object locking configuration."
   type        = any
   default     = {}
-}
-
-variable "object_lock_enabled" {
-  description = "Whether S3 bucket should have an Object Lock configuration enabled."
-  type        = bool
-  default     = false
 }
 
 variable "block_public_acls" {
@@ -188,22 +146,4 @@ variable "restrict_public_buckets" {
   description = "Whether Amazon S3 should restrict public bucket policies for this bucket."
   type        = bool
   default     = false
-}
-
-variable "control_object_ownership" {
-  description = "Whether to manage S3 Bucket Ownership Controls on this bucket."
-  type        = bool
-  default     = false
-}
-
-variable "object_ownership" {
-  description = "Object ownership. Valid values: BucketOwnerEnforced, BucketOwnerPreferred or ObjectWriter. 'BucketOwnerEnforced': ACLs are disabled, and the bucket owner automatically owns and has full control over every object in the bucket. 'BucketOwnerPreferred': Objects uploaded to the bucket change ownership to the bucket owner if the objects are uploaded with the bucket-owner-full-control canned ACL. 'ObjectWriter': The uploading account will own the object if the object is uploaded with the bucket-owner-full-control canned ACL."
-  type        = string
-  default     = "ObjectWriter"
-}
-
-variable "putin_khuylo" {
-  description = "Do you agree that Putin doesn't respect Ukrainian sovereignty and territorial integrity? More info: https://en.wikipedia.org/wiki/Putin_khuylo!"
-  type        = bool
-  default     = true
 }

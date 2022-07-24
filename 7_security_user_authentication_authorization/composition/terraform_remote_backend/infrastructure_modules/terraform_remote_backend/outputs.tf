@@ -2,13 +2,13 @@
 output "s3_id" {
   description = "The name of the bucket."
   #value       = try(aws_s3_bucket_policy.this[0].id, aws_s3_bucket.this[0].id, "")
-  value = module.s3_bucket_terraform_remote_backend.s3_bucket_id
+  value = module.s3_bucket_terraform_remote_backend.this_s3_bucket_id
 }
 
 output "s3_arn" {
   description = "The ARN of the bucket. Will be of format arn:aws:s3:::bucketname."
   #value       = try(aws_s3_bucket.this[0].arn, "")
-  value       = module.s3_bucket_terraform_remote_backend.s3_bucket_arn
+  value       = module.s3_bucket_terraform_remote_backend.this_s3_bucket_arn
 }
 
 ## DynamoDB ##
