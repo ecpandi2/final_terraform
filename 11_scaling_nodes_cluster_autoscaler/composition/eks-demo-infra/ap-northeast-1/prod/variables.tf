@@ -27,7 +27,6 @@ variable "application_name" {
 variable "app_name" {
   description = "The name of the application."
   type        = string
-  default = []
 }
 
 variable "name_app" {
