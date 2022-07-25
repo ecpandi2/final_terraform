@@ -1,12 +1,14 @@
 terraform {
-  required_version = ">= 0.12.9, != 0.13.0"
+  required_version = "> 1.0"
 
   required_providers {
-    aws        = ">= 3.22.0"
-    local      = ">= 1.4"
-    null       = ">= 2.1"
-    template   = ">= 2.1"
-    random     = ">= 2.1"
-    kubernetes = ">= 1.11.1"
+    aws        = "> 4.0"
+    random     = "~> 3.3"
+    kubernetes = "~> 2.0"
+    local      = "~> 2.2"
+    null       = "~> 3.1"
+    template   = "~> 2.1"
+    helm       = "~> 2.0"
+    kubectl    = "~> 1.0"
   }
 }
