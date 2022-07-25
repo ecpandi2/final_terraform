@@ -1,10 +1,10 @@
 # Kubernetes Service Manifest (Type: Load Balancer)
 resource "kubernetes_ingress_v1" "ingress" {
   metadata {
-    name = "ingress-ssl-demo"
+    name = "ingress-externaldns-demo"
     annotations = {
       # Load Balancer Name
-      "alb.ingress.kubernetes.io/load-balancer-name" = "ingress-ssl-demo"
+      "alb.ingress.kubernetes.io/load-balancer-name" = "ingress-externaldns-demo"
       # Ingress Core Settings
       "alb.ingress.kubernetes.io/scheme" = "internet-facing"
       # Health Check Settings
@@ -20,11 +20,13 @@ resource "kubernetes_ingress_v1" "ingress" {
       # Option-1: Using Terraform jsonencode Function
       "alb.ingress.kubernetes.io/listen-ports" = jsonencode([{"HTTPS" = 443}, {"HTTP" = 80}])
       # Option-2: Using Terraform File Function      
-      #"alb.ingress.kubernetes.io/listen-ports" = file("${path.module}/listen-ports/listen-ports.json")   
+      #"alb.ingress.kubernetes.io/listen-ports" = file("${path.module}/listen-ports/listen-ports.json")
       "alb.ingress.kubernetes.io/certificate-arn" =  "${aws_acm_certificate.acm_cert.arn}"
       #"alb.ingress.kubernetes.io/ssl-policy" = "ELBSecurityPolicy-TLS-1-1-2017-01" #Optional (Picks default if not used)    
       # SSL Redirect Setting
       "alb.ingress.kubernetes.io/ssl-redirect" = 443
+      # External DNS - For creating a Record Set in Route53
+      "external-dns.alpha.kubernetes.io/hostname" = "tfdnstest901.cmcloudlab711.info, tfdnstest902.cmcloudlab711.info"
     }    
   }
   spec {
