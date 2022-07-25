@@ -15,7 +15,7 @@ spec:
     resources: {}
   dnsPolicy: ClusterFirst
   restartPolicy: Never
-  # serviceAccountName: test-irsa   # <------- don't use this service account
+  #serviceAccountName: test-irsa   # <------- don't use this service account
   # affinity:  # since we added taint and label to worker node, pod needs affinity and tolerations
   #   nodeAffinity:
   #     requiredDuringSchedulingIgnoredDuringExecution:
