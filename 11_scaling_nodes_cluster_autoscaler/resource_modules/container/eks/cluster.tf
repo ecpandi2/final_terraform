@@ -352,7 +352,7 @@ resource "helm_release" "loadbalancer_controller" {
 
   set {
     name  = "vpcId"
-    value = concat(aws_vpc.this.*.id, [""])[0]
+    value = "${var.vpc_id}"
   }  
 
   set {
