@@ -1,120 +1,113 @@
-# Resource: MySQL Kubernetes Deployment
-resource "kubernetes_deployment_v1" "mysql_deployment" {
+# Kubernetes Deployment Manifest
+resource "kubernetes_deployment_v1" "myapp1" {
   metadata {
-    name = "mysql"
-  }
-  spec {
-    replicas = 1
-    selector {
-      match_labels = {
-        app = "mysql"
-      }          
-    }
-    strategy {
-      type = "Recreate"
-    }  
-    template {
-      metadata {
-        labels = {
-          app = "mysql"
-        }
-      }
-      spec {
-        volume {
-          name = "mysql-persistent-storage"
-          persistent_volume_claim {
-            #claim_name = kubernetes_persistent_volume_claim_v1.pvc.metadata.0.name # THIS IS NOT GOING WORK, WE NEED TO GIVE PVC NAME DIRECTLY OR VIA VARIABLE, direct resource name reference will fail.
-            claim_name = "ebs-mysql-pv-claim"
-          }
-        }
-        volume {
-          name = "usermanagement-dbcreation-script"
-          config_map {
-            name = kubernetes_config_map_v1.config_map.metadata.0.name 
-          }
-        }
-        container {
-          name = "mysql"
-          image = "mysql:5.6"
-          port {
-            container_port = 3306
-            name = "mysql"
-          }
-          env {
-            name = "MYSQL_ROOT_PASSWORD"
-            value = "dbpassword11"
-          }
-          volume_mount {
-            name = "mysql-persistent-storage"
-            mount_path = "/var/lib/mysql"
-          }
-          volume_mount {
-            name = "usermanagement-dbcreation-script"
-            mount_path = "/docker-entrypoint-initdb.d" #https://hub.docker.com/_/mysql Refer Initializing a fresh instance                                            
-          }
-        }
-      }
-    }      
-  }
-  
-}
-
-# Resource: UserMgmt WebApp Kubernetes Deployment
-resource "kubernetes_deployment_v1" "usermgmt_webapp" {
-  depends_on = [kubernetes_deployment_v1.mysql_deployment]
-  metadata {
-    name = "usermgmt-webapp"
+    name = "app1-nginx-deployment"
     labels = {
-      app = "usermgmt-webapp"
+      app = "app1-nginx"
     }
-  }
+  } 
  
   spec {
     replicas = 1
+
     selector {
       match_labels = {
-        app = "usermgmt-webapp"
+        app = "app1-nginx"
       }
     }
+
     template {
       metadata {
         labels = {
-          app = "usermgmt-webapp"
+          app = "app1-nginx"
         }
       }
+
       spec {
         container {
-          image = "stacksimplify/kube-usermgmt-webapp:1.0.0-MySQLDB"
-          name  = "usermgmt-webapp"
-          #image_pull_policy = "always"  # Defaults to Always so we can comment this
+          image = "stacksimplify/kube-nginxapp1:1.0.0"
+          name  = "app1-nginx"
           port {
-            container_port = 8080
+            container_port = 80
           }
-          env {
-            name = "DB_HOSTNAME"
-            #value = "mysql"
-            value = kubernetes_service_v1.mysql_clusterip_service.metadata.0.name 
           }
-          env {
-            name = "DB_PORT"
-            #value = "3306"
-            value = kubernetes_service_v1.mysql_clusterip_service.spec.0.port.0.port
-          }
-          env {
-            name = "DB_NAME"
-            value = "webappdb"
-          }
-          env {
-            name = "DB_USERNAME"
-            value = "root"
-          }
-          env {
-            name = "DB_PASSWORD"
-            #value = "dbpassword11"
-            value = kubernetes_deployment_v1.mysql_deployment.spec.0.template.0.spec.0.container.0.env.0.value
-          }          
         }
       }
     }
-  }
+}
+
+# Kubernetes Deployment Manifest
+resource "kubernetes_deployment_v1" "myapp2" {
+  metadata {
+    name = "app2-nginx-deployment"
+    labels = {
+      app = "app2-nginx"
+    }
+  } 
+ 
+  spec {
+    replicas = 1
+
+    selector {
+      match_labels = {
+        app = "app2-nginx"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = "app2-nginx"
+        }
+      }
+
+      spec {
+        container {
+          image = "stacksimplify/kube-nginxapp2:1.0.0"
+          name  = "app2-nginx"
+          port {
+            container_port = 80
+          }
+          }
+        }
+      }
+    }
+}
+
+# Kubernetes Deployment Manifest
+resource "kubernetes_deployment_v1" "myapp3" {
+  metadata {
+    name = "app3-nginx-deployment"
+    labels = {
+      app = "app3-nginx"
+    }
+  } 
+ 
+  spec {
+    replicas = 1
+
+    selector {
+      match_labels = {
+        app = "app3-nginx"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = "app3-nginx"
+        }
+      }
+
+      spec {
+        container {
+          image = "stacksimplify/kubenginx:1.0.0"
+          name  = "app3-nginx"
+          port {
+            container_port = 80
+          }
+          }
+        }
+      }
+    }
 }
