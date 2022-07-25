@@ -263,7 +263,7 @@ resource "helm_release" "ebs_csi_driver" {
   }
     
 }
-
+/*
 # Resource: EBS CSI Driver AddOn
 # Install EBS CSI Driver using EKS Add-Ons (aws_eks_addon)
 resource "aws_eks_addon" "ebs_eks_addon" {
@@ -272,7 +272,7 @@ resource "aws_eks_addon" "ebs_eks_addon" {
   addon_name   = "aws-ebs-csi-driver"
   service_account_role_arn = aws_iam_role.ebs_csi_iam_role.arn 
 }
-
+*/
 # Resource: Create AWS Load Balancer Controller IAM Policy 
 resource "aws_iam_policy" "lbc_iam_policy" {
   name        = "AWSLoadBalancerControllerIAMPolicy"
