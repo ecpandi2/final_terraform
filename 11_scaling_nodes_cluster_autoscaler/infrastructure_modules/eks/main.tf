@@ -8,7 +8,7 @@ module "key_pair" {
 # ref: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/examples/basic/main.tf#L125-L160
 module "eks_cluster" {
   source = "../../resource_modules/container/eks"
-
+  
   create_eks      = var.create_eks
   cluster_version = var.cluster_version
   cluster_name    = var.cluster_name
