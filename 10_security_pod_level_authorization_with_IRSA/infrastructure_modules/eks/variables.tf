@@ -141,10 +141,6 @@ variable "environment_tag" {
 }
 
 
-## IRSA & cluster autoscaler ##
-variable "enable_irsa" {
-  description = "Whether to create OpenID Connect Provider for EKS to enable IRSA	"
-}
 
 ## test_irsa_iam_assumable_role ##
 variable "test_irsa_service_account_namespace" {
