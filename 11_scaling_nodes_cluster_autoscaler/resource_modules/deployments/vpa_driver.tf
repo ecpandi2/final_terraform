@@ -13,7 +13,7 @@ resource "null_resource" "git_clone" {
 resource "null_resource" "install_vpa" {
   depends_on = [null_resource.git_clone]
  provisioner "local-exec" { 
-    command = "${path.module}/autoscaler/vertical-pod-autoscaler/hack/vpa-up.sh"
+    command = "/home/pandiyan/final_terraform/11_scaling_nodes_cluster_autoscaler/composition/eks-demo-infra/ap-northeast-1/prod/autoscaler/vertical-pod-autoscaler/hack/vpa-up.sh"
   }
 }
 
@@ -30,7 +30,7 @@ resource "null_resource" "remove_git_clone_autoscaler_folder" {
 resource "null_resource" "uninstall_vpa" {
   depends_on = [null_resource.remove_git_clone_autoscaler_folder]
  provisioner "local-exec" { 
-    command = "${path.module}/autoscaler/vertical-pod-autoscaler/hack/vpa-down.sh"
+    command = "/home/pandiyan/final_terraform/11_scaling_nodes_cluster_autoscaler/composition/eks-demo-infra/ap-northeast-1/prod/autoscaler/vertical-pod-autoscaler/hack/vpa-down.sh"
     when = destroy
   }
 }
