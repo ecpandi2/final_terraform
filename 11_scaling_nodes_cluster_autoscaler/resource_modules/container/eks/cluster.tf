@@ -362,7 +362,7 @@ resource "helm_release" "loadbalancer_controller" {
 
   set {
     name  = "clusterName"
-    value = element(concat(aws_eks_cluster.this.*.id, tolist([""])), 0)
+    value = "${var.cluster_name}"
   }    
     
 }
