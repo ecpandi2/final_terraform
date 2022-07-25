@@ -430,7 +430,7 @@ resource "aws_iam_role" "externaldns_iam_role" {
         Effect = "Allow"
         Sid    = ""
         Principal = {
-          Federated = "${data.terraform_remote_state.eks.outputs.aws_iam_openid_connect_provider_arn}"
+          Federated = var.enable_irsa ? concat(aws_iam_openid_connect_provider.oidc_provider[*].arn, [""])[0] : null
         }
         Condition = {
           StringEquals = {
