@@ -4,7 +4,6 @@ locals {
     Application = var.app_name
     Terraform   = true
   }
-  name_app = var.name_app
   ########################################
   # VPC
   ########################################
