@@ -352,7 +352,7 @@ resource "helm_release" "loadbalancer_controller" {
 
   set {
     name  = "vpcId"
-    value = "${data.terraform_remote_state.eks.outputs.vpc_id}"
+    value = concat(aws_vpc.this.*.id, [""])[0]
   }  
 
   set {
@@ -362,7 +362,7 @@ resource "helm_release" "loadbalancer_controller" {
 
   set {
     name  = "clusterName"
-    value = "${data.terraform_remote_state.eks.outputs.cluster_id}"
+    value = element(concat(aws_eks_cluster.this.*.id, tolist([""])), 0)
   }    
     
 }
