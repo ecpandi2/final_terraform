@@ -31,6 +31,11 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(element(concat(data.aws_eks_cluster.cluster[*].certificate_authority.0.data, tolist([""])), 0))
   token                  = element(concat(data.aws_eks_cluster_auth.cluster[*].token, tolist([""])), 0)
 #  load_config_file       = false # set to false unless you want to import local kubeconfig to terraform
+ exec {
+      api_version = "client.authentication.k8s.io/v1alpha1"
+      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_id]
+      command     = "aws"
+    }
 }
 
 provider "helm" {
@@ -40,6 +45,11 @@ provider "helm" {
       cluster_ca_certificate = base64decode(element(concat(data.aws_eks_cluster.cluster[*].certificate_authority.0.data, tolist([""])), 0))
       token                  = element(concat(data.aws_eks_cluster_auth.cluster[*].token, tolist([""])), 0)
         #  load_config_file       = false # set to false unless you want to import local kubeconfig to terraform
+    exec {
+      api_version = "client.authentication.k8s.io/v1alpha1"
+      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_id]
+      command     = "aws"
+    }
    }
 
 }
