@@ -32,7 +32,7 @@ provider "kubernetes" {
   token                  = element(concat(data.aws_eks_cluster_auth.cluster[*].token, tolist([""])), 0)
 #  load_config_file       = false # set to false unless you want to import local kubeconfig to terraform
  exec {
-      api_version = "client.authentication.k8s.io/v1"
+      api_version = "client.authentication.k8s.io/v1beta1"
       args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_id]
       command     = "aws"
     }
@@ -46,7 +46,7 @@ provider "helm" {
       token                  = element(concat(data.aws_eks_cluster_auth.cluster[*].token, tolist([""])), 0)
         #  load_config_file       = false # set to false unless you want to import local kubeconfig to terraform
     exec {
-      api_version = "client.authentication.k8s.io/v1"
+      api_version = "client.authentication.k8s.io/v1beta1"
       args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_id]
       command     = "aws"
     }
