@@ -23,3 +23,8 @@ variable "storage_size" {
   type = string
   default = "4Gi"
 }
+
+variable "cluster_name" {
+  description = "Name of the EKS cluster. Also used as a prefix in names of related resources."
+  type        = string
+}
