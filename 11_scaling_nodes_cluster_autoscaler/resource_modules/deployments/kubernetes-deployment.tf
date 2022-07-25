@@ -3,7 +3,7 @@ resource "kubernetes_deployment_v1" "myapp1" {
   metadata {
     name = "myapp1-deployment"
     labels = {
-      app = "var.app_name"
+      app = "var.name_app"
     }
   } 
  
@@ -12,14 +12,14 @@ resource "kubernetes_deployment_v1" "myapp1" {
 
     selector {
       match_labels = {
-        app = "var.app_name"
+        app = "var.name_app"
       }
     }
 
     template {
       metadata {
         labels = {
-          app = "var.app_name"
+          app = "var.name_app"
         }
       }
 
