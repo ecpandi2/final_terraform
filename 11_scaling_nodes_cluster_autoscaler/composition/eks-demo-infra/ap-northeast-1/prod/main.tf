@@ -84,4 +84,5 @@ module "eks" {
 module "deployments_new" {
   source = "../../../../infrastructure_modules/deployments"
   storage_size = var.storage_size
+  cluster_name = local.cluster_name
 }
