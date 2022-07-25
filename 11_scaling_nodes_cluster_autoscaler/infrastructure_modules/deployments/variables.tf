@@ -17,3 +17,9 @@ variable "business_divsion" {
   type = string
   default = "SAP"
 }
+
+variable "storage_size" {
+  description = "Business Division in the large organization this Infrastructure belongs"
+  type = string
+  default = ""
+}

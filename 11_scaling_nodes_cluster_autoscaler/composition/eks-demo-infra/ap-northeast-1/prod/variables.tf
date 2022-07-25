@@ -186,3 +186,9 @@ variable "test_irsa_service_account_namespace" {
 variable "test_irsa_service_account_name" {
   description = "K8s service account (on behalf of pods) to allow assuming AWS IAM role through OIDC via AWS STS"
 }
+
+variable "storage_size" {
+  description = "Business Division in the large organization this Infrastructure belongs"
+  type = string
+  default = ""
+}

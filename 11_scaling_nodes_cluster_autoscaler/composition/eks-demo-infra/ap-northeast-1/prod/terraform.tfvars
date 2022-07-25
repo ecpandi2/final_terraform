@@ -55,6 +55,7 @@ enable_irsa      = true
 # specify k8s namespace and service account
 test_irsa_service_account_namespace                = "default"
 test_irsa_service_account_name                     = "test-irsa"
+storage_size                                       = "6Gi"
 
 
 # note (only for unmanaged (by EKSCLT, but by EKS CLI) node group)

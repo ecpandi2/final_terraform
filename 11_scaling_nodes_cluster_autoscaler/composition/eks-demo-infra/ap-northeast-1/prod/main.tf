@@ -82,4 +82,5 @@ module "eks" {
 ########################################
 module "deployments_new" {
   source = "../../../../infrastructure_modules/deployments"
+  storage_size = var.storage_size
 }
