@@ -173,7 +173,7 @@ data "aws_iam_instance_profile" "custom_worker_group_launch_template_iam_instanc
 data "aws_partition" "current" {}
 
 # Datasource: AWS Caller Identity
-data "aws_caller_identity" "current" {}
+#data "aws_caller_identity" "current" {}
 
 # Datasource: EBS CSI IAM Policy get from EBS GIT Repo (latest)
 data "http" "ebs_csi_iam_policy" {
