@@ -48,7 +48,11 @@ resource "aws_eks_cluster" "this" {
     aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy,
     aws_iam_role_policy_attachment.cluster_AmazonEKSServicePolicy,
     aws_iam_role_policy_attachment.cluster_AmazonEKSVPCResourceControllerPolicy,
-    aws_cloudwatch_log_group.this
+    aws_cloudwatch_log_group.this,
+    kubernetes_config_map.aws_auth,
+    aws_iam_role_policy_attachment.workers_AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.workers_AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.workers_AmazonEC2ContainerRegistryReadOnly
   ]
 }
 

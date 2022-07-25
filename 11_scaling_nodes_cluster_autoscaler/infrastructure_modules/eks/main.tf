@@ -45,6 +45,7 @@ module "eks_cluster" {
   ]
 
   tags = var.tags
+ 
 }
 
 

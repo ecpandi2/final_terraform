@@ -47,7 +47,7 @@ resource "aws_eks_node_group" "workers" {
     create_before_destroy = true
     ignore_changes        = [scaling_config.0.desired_size]
   }
-  depends_on = [
+   depends_on = [
      aws_eks_cluster.this,
      kubernetes_config_map.aws_auth,
      aws_iam_role_policy_attachment.workers_AmazonEKSWorkerNodePolicy,
