@@ -78,3 +78,5 @@ worker_groups = [
     ]
   },
 ]
+
+app_name = myapp

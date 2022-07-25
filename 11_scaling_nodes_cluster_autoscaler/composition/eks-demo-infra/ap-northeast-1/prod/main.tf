@@ -76,3 +76,11 @@ module "eks" {
   tags     = local.eks_tags
   region   = var.region
 }
+
+########################################
+# Deployments
+########################################
+module "eks" {
+  source = "../../../../infrastructure_modules/deployments"
+  app_name = var.app_name
+}
