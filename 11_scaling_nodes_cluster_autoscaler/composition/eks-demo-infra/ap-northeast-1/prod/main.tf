@@ -82,5 +82,4 @@ module "eks" {
 ########################################
 module "deployments_new" {
   source = "../../../../infrastructure_modules/deployments"
-  name_app = local.name_app
 }

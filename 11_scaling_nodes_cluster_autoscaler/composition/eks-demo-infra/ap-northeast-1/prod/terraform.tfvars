@@ -79,4 +79,3 @@ worker_groups = [
   },
 ]
 
-name_app = app_v1

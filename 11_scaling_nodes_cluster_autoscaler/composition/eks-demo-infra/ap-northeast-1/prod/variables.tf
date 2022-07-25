@@ -29,10 +29,6 @@ variable "app_name" {
   type        = string
 }
 
-variable "name_app" {
-  description = "The name of the application."
-  type        = string
- }
 
 variable "region_tag" {
   type = map(any)
