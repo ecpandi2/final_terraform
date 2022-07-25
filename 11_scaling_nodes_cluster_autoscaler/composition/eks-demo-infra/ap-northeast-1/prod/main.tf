@@ -14,6 +14,7 @@ module "vpc" {
   enable_dns_support   = var.enable_dns_support
   enable_nat_gateway   = var.enable_nat_gateway
   single_nat_gateway   = var.single_nat_gateway
+  cluster_name         = local.cluster_name
 
   ## Public Security Group ##
   public_ingress_with_cidr_blocks = var.public_ingress_with_cidr_blocks
