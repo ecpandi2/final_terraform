@@ -175,3 +175,22 @@ output "security_group_rule_cluster_https_worker_ingress" {
   description = "Security group rule responsible for allowing pods to communicate with the EKS cluster API."
   value       = aws_security_group_rule.cluster_https_worker_ingress
 }
+
+output "aws_account_id" {
+  value = data.aws_caller_identity.current.account_id
+}
+
+output "ebs_csi_iam_policy" {
+  value = data.http.ebs_csi_iam_policy.body
+}
+
+output "ebs_csi_iam_role_arn" {
+  description = "EBS CSI IAM Role ARN"
+  value = aws_iam_role.ebs_csi_iam_role.arn
+}
+
+# EBS CSI Helm Release Outputs
+output "ebs_csi_helm_metadata" {
+  description = "Metadata Block outlining status of the deployed release."
+  value = helm_release.ebs_csi_driver.metadata
+}

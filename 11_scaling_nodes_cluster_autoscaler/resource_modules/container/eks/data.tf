@@ -171,3 +171,30 @@ data "aws_iam_instance_profile" "custom_worker_group_launch_template_iam_instanc
 }
 
 data "aws_partition" "current" {}
+
+# Datasource: AWS Caller Identity
+data "aws_caller_identity" "current" {}
+
+# Datasource: EBS CSI IAM Policy get from EBS GIT Repo (latest)
+data "http" "ebs_csi_iam_policy" {
+  url = "https://raw.githubusercontent.com/kubernetes-sigs/aws-ebs-csi-driver/master/docs/example-iam-policy.json"
+
+  # Optional request headers
+  request_headers = {
+    Accept = "application/json"
+  }
+}
+
+# Datasource: EKS Cluster Auth 
+data "aws_eks_cluster_auth" "cluster" {
+  name = element(concat(aws_eks_cluster.this.*.id, tolist([""])), 0)
+}
+
+# HELM Provider
+provider "helm" {
+  kubernetes {
+    host                   = element(concat(aws_eks_cluster.this.*.endpoint, tolist([""])), 0)
+    cluster_ca_certificate = base64decode(element(concat(aws_eks_cluster.this[*].certificate_authority[0].data, tolist([""])), 0))
+    token                  = data.aws_eks_cluster_auth.cluster.token
+  }
+}

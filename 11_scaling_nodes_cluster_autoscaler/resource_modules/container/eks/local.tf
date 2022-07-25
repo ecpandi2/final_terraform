@@ -1,5 +1,11 @@
 locals {
-
+  owners = var.business_divsion
+  environment = var.environment
+  name = "${var.business_divsion}-${var.environment}"
+  common_tags = {
+    owners = local.owners
+    environment = local.environment
+  }
   cluster_security_group_id         = var.cluster_create_security_group ? join("", aws_security_group.cluster.*.id) : var.cluster_security_group_id
   cluster_primary_security_group_id = var.cluster_version >= 1.14 ? element(concat(aws_eks_cluster.this[*].vpc_config[0].cluster_security_group_id, tolist([""])), 0) : null
   cluster_iam_role_name             = var.manage_cluster_iam_resources ? join("", aws_iam_role.cluster.*.name) : var.cluster_iam_role_name
