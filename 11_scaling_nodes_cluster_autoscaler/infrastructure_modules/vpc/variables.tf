@@ -79,7 +79,7 @@ variable "databse_computed_ingress_with_eks_worker_source_security_group_ids" {
   }))
 }
 
-# variable "cluster_name" {}
+variable "cluster_name" {}
 
 
 ## Metatada ##
