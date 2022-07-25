@@ -4,7 +4,7 @@
 # Resource-1: Null Resource: Clone GitHub Repository
 resource "null_resource" "git_clone" {
   provisioner "local-exec" {
-    command = "git clone git@github.com:kubernetes/autoscaler.git"
+    command = "git clone https://github.com/kubernetes/autoscaler.git"
   }
 }
 
