@@ -9,6 +9,9 @@ terraform {
     null       = "~> 3.1"
     template   = "~> 2.1"
     helm       = "~> 2.0"
-    kubectl    = "~> 1.0"
+    kubectl    =  {
+      source = "gavinbunney/kubectl"
+      version = "1.14.0"
+    }
   }
 }
