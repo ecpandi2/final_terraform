@@ -56,8 +56,6 @@ enable_irsa      = true
 test_irsa_service_account_namespace                = "default"
 test_irsa_service_account_name                     = "test-irsa"
 
-cluster_autoscaler_service_account_namespace           = "kube-system"
-cluster_autoscaler_service_account_name                = "cluster-autoscaler-aws-cluster-autoscaler"
 
 # note (only for unmanaged (by EKSCLT, but by EKS CLI) node group)
 # gotcha: need to use kubelet_extra_args to propagate taints/labels to K8s node, because ASG tags not being propagated to k8s node objects.
@@ -76,7 +74,6 @@ worker_groups = [
         "key"                 = "unmanaged-node"
         "propagate_at_launch" = "true"
         "value"               = "true"
-        "key"                 = "k8s.io/cluster-autoscaler/enabled" # <----- STEP 2
       },
     ]
   },

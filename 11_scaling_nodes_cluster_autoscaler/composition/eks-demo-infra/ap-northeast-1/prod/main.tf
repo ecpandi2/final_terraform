@@ -59,8 +59,6 @@ module "eks" {
 
   test_irsa_service_account_namespace                = "default"  # <------ STEP 6
   test_irsa_service_account_name                     = "test-irsa"
-  cluster_autoscaler_service_account_namespace = var.cluster_autoscaler_service_account_namespace # <------ STEP 3
-  cluster_autoscaler_service_account_name      = var.cluster_autoscaler_service_account_name
 
   # this is for (EKS API) managed node group
   node_groups = var.node_groups

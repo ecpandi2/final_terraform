@@ -32,59 +32,7 @@ locals {
   ## test_irsa_iam_assumable_role ##
   test_irsa_iam_role_name = "TestIrsaS3ReadOnlyRole"
 
-  ## cluster_autoscaler_iam_role ##
-  cluster_autoscaler_iam_role_name = "EKSClusterAutoscaler"
-
-  ## cluster_autoscaler_iam_policy ##
-  cluster_autoscaler_iam_policy_description = "EKS cluster-autoscaler policy for cluster ${module.eks_cluster.cluster_id}"
-  cluster_autoscaler_iam_policy_name        = "${local.cluster_autoscaler_iam_role_name}Policy"
-  cluster_autoscaler_iam_policy_path        = "/"
-}
-
-data "aws_iam_policy_document" "cluster_autoscaler" {
-  statement {
-    sid    = "clusterAutoscalerAll"
-    effect = "Allow"
-
-    actions = [
-      "autoscaling:DescribeAutoScalingGroups",
-      "autoscaling:DescribeAutoScalingInstances",
-      "autoscaling:DescribeLaunchConfigurations",
-      "autoscaling:DescribeTags",
-      "ec2:DescribeLaunchTemplateVersions",
-    ]
-
-    resources = ["*"]
-  }
-
-  statement {
-    sid    = "clusterAutoscalerOwn"
-    effect = "Allow"
-
-    actions = [
-      "autoscaling:SetDesiredCapacity",
-      "autoscaling:TerminateInstanceInAutoScalingGroup",
-      "autoscaling:UpdateAutoScalingGroup",
-    ]
-
-    resources = ["*"]
-
-    # limit who can assume the role
-    # ref: https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts-technical-overview.html
-    # ref: https://www.terraform.io/docs/providers/aws/r/eks_cluster.html#enabling-iam-roles-for-service-accounts
-
-    condition {
-      test     = "StringEquals"
-      variable = "autoscaling:ResourceTag/kubernetes.io/cluster/${module.eks_cluster.cluster_id}" # <------- specifying ASG by tag we added in STEP 1
-      values   = ["shared"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "autoscaling:ResourceTag/k8s.io/cluster-autoscaler/enabled" # <------- specifying ASG by tag we added in STEP 1
-      values   = ["true"]
-    }
-  }
+  
 }
 
 data "aws_iam_policy" "s3_read_only_access_policy" {
