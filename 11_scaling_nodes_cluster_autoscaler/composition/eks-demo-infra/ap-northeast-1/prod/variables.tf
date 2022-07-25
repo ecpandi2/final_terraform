@@ -32,8 +32,7 @@ variable "app_name" {
 variable "name_app" {
   description = "The name of the application."
   type        = string
-  default = ""
-}
+ }
 
 variable "region_tag" {
   type = map(any)
