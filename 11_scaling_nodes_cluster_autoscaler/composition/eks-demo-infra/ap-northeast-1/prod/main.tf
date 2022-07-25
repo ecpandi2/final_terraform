@@ -80,7 +80,7 @@ module "eks" {
 ########################################
 # Deployments
 ########################################
-module "eks" {
+module "deployments" {
   source = "../../../../infrastructure_modules/deployments"
   app_name = var.app_name
 }
