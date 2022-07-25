@@ -46,8 +46,8 @@ provider "helm" {
    kubernetes {
        # if you use default value of "manage_aws_auth = true" then you need to configure the kubernetes provider as per the doc: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/v12.1.0/README.md#conditional-creation, https://github.com/terraform-aws-modules/terraform-aws-eks/issues/911
       host                   = module.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-  token                  = element(concat(data.aws_eks_cluster_auth.cluster[*].token, tolist([""])), 0)
+      cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+      token                  = element(concat(data.aws_eks_cluster_auth.cluster[*].token, tolist([""])), 0)
 #  load_config_file       = false # set to false unless you want to import local kubeconfig to terraform
  exec {
       api_version = "client.authentication.k8s.io/v1"
@@ -55,5 +55,10 @@ provider "helm" {
       command     = "aws"
     }
    }
+}
 
+provider "kubectl" {
+     host                   = module.eks.cluster_endpoint
+     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+     token                  = element(concat(data.aws_eks_cluster_auth.cluster[*].token, tolist([""])), 0)
 }

@@ -1,41 +1,39 @@
 # Kubernetes Deployment Manifest
-resource "kubernetes_deployment_v1" "myapp3" {
+resource "kubernetes_deployment_v1" "vpa_demo_app" {
   metadata {
-    name = "app3-nginx-deployment"
+    name = "vpa-demo-deployment" 
     labels = {
-      app = "app3-nginx"
+      app = "vpa-nginx"
     }
   } 
  
   spec {
-    replicas = 1
+    replicas = 4
 
     selector {
       match_labels = {
-        app = "app3-nginx"
+        app = "vpa-nginx"
       }
     }
 
     template {
       metadata {
         labels = {
-          app = "app3-nginx"
+          app = "vpa-nginx"
         }
       }
 
       spec {
         container {
-          image = "k8s.gcr.io/hpa-example"
-          name  = "app3-nginx"
+          image = "stacksimplify/kubenginx:1.0.0"
+          name  = "vpa-nginx"
           port {
             container_port = 80
           }
           resources {
-            limits = {
-              cpu = "500m"
-            }
             requests = {
-              cpu = "200m"
+              cpu = "5m"
+              memory = "5Mi"
             }
           }
           }
