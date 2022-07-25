@@ -235,7 +235,7 @@ resource "helm_release" "ebs_csi_driver" {
     #aws_iam_openid_connect_provider.oidc_provider,
     aws_iam_role.ebs_csi_iam_role
   ]
-  name       = "${local.name}-aws-ebs-csi-driver"
+  name       = "aws-ebs-csi-driver"
 
   repository = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
   chart      = "aws-ebs-csi-driver"
