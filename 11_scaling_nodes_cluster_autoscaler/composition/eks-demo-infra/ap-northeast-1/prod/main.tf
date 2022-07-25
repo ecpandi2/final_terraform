@@ -82,5 +82,5 @@ module "eks" {
 ########################################
 module "deployments" {
   source = "../../../../infrastructure_modules/deployments"
-  app_name = var.app_name
+  name_app = var.name_app
 }
