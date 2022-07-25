@@ -565,7 +565,7 @@ resource "aws_iam_role_policy_attachment" "cluster_autoscaler_iam_role_policy_at
 # Resource: Helm Release 
 resource "helm_release" "cluster_autoscaler_release" {
   depends_on = [aws_iam_role.cluster_autoscaler_iam_role ]            
-  name       = "${local.name}-ca"
+  name       = "ca"
 
   repository = "https://kubernetes.github.io/autoscaler"
   chart      = "cluster-autoscaler"
