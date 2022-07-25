@@ -509,6 +509,7 @@ dynamic "instance_market_options" {
     aws_iam_role_policy_attachment.workers_AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.workers_AmazonEC2ContainerRegistryReadOnly,
     aws_iam_role_policy_attachment.workers_additional_policies
+    
   ]
 }
 
